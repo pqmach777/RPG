@@ -18,20 +18,16 @@ class Character:
         self.player = True
         self.crit_chance = True
         self.coins = 100
-        self.iteminventory = []
-        self.armorinventory = []
-        self.weaponinventory = []
+        self.itemsinventory = []
+        self.armorsinventory = []
+        self.weaponsinventory = []
         self.armor = 0 
         self.evade = 0
 
 
-    def alive(self):
-        if self.health > 0:
-            return True
-        else:
-            return False
 
     def attack(self,enemy):
+        # player attack
         if self.player == True:
             if self.crit_chance == True: 
                 if randint(1,5) == 5:
@@ -44,19 +40,40 @@ class Character:
                     else:
                         enemy.health -= float(self.power * 1.5)
                         print(f"{self.name} critical for {float(self.power*1.5)} damage to {enemy.name}.")
-
                 else:
                     enemy.health -= self.power
                     print(f"{self.name} did {self.power} damage to {enemy.name}.")
             else:
                 enemy.health -= self.power
                 print(f"{self.name} did {self.power} damage to {enemy.name}.")
-            if enemy.name != "Zombie Lord" and enemy.health <= 0:
-                print(f"{self.name} has slain {enemy.name}.")
-                self.coins += enemy.bounty
-                print(f"{self.name} have {self.money}")
+                if enemy.health <= 0 and enemy.name != "Zomebie Lord":
+                    print(f"{self.name} has slain {enemy.name}.")
+                    self.coins += enemy.bounty
+                    print(f"{self.name} have {self.coins} coins")
 
+                    main(enemylist[randint(0, 2)])
+
+        # enemy attack
         else:
+            if enemy.evade > 0:
+                number = round(uniform(0.1,(1.0 - float(0.05 * enemy.evade))),2)
+                if number != float(0.1) and number <= float(0.2):
+                    print(f"{enemy.name} evaded {self.name} hit!")
+                elif enemy.evade == self.power:
+                    print(f"{enemy.name} dodged {self.name} attack.")
+                else:
+                    enemy.health -= self.power
+                    print(f"{self.name} did {self.power} damage to {enemy.name}. ")
+
+            if enemy.armor > 0:
+                if enemy.armor >= self.power:
+                    print(f'{enemy.name} armor tanked his hit. {enemy.name} received no damage.')
+                elif enemy.armor < self.power:
+                    enemy.health -= (self.power - enemy.armor)
+                    print(f"{self.name} did {self.power} damage to {enemy.name}. ")
+                else:
+                    enemy.health -= self.power
+                    print(f"{self.name} did {self.power} damage to {enemy.name}. ")                    
             if self.crit_chance == True:
                 if randint(1,5) == 5:                    
                     enemy.health -= float(self.power * 1.5)
@@ -70,52 +87,155 @@ class Character:
             if enemy.health <=0:
                 print("You are dead.")
 
-    def items_Inventory(self,enemy):
-        print(f'Here is what in your item inventory: {self.iteminventory}')  
-        use_item = input("What item would you like to use? ") 
-        if use_item == "Super Tonic":
-            self.iteminventory.remove(use_item)
-            self.health += 10
-            print(f'You have healed {self.health} health.')
-        if use_item == "Scroll of Teleport" or self.player == True:
-            self.evade += 2
-            if self.evade > 0 :
-                number = round(uniform(0.1,(1.0 - float(0.05 * self.evade)))2)
-                if number != float(0.1) and number <= float(0.2):
-                    print(f"{self.name} evaded {enemy.name} hit!")
-                else:
-                    self.attack(enemy)
+    def purchases(self):
+        while True:
+            shopping = input(f"Would {self.name} like to go shopping? (Yes/No) ")
+            if shopping == 'Yes':
+                print(f"You have {self.coins} coins")
+                buying_options = input("What do you want to buy? (Items, Armors, Weapons) ")
+                if buying_options == 'Items':
+                    for key in itemsStore:
+                        print(f"{key} = {itemsStore[key]}")
+                    items_tobuy = input('What items would you like to buy? ')
+                    if items_tobuy in itemsStore.keys() and itemsStore[items_tobuy] < self.coins:
+                        self.coins -= itemsStore[items_tobuy]
+                        print(f"{self.name} bought {items_tobuy}.")
+                        self.itemsinventory.append(items_tobuy)
+                        print(f"{self.name} add {items_tobuy} to items inventory.")
+                        continue_shopping = input(f"Do you want to continue shopping? (Yes/No) ")
+                        if continue_shopping == "Yes":
+                           Character.purchases(self)
+                        elif continue_shopping == "No":
+                            main(enemylist[randint(0, 2)])
+                        else:
+                            print("Invalid Input. Please type Yes or No. ")
+
+                    else:                   
+                        print("Sorry, you were unable to purchase any items.")
+                        buy_others = input("Do you want to see the buying options again? (Yes/No) ")
+                        if buy_others == "Yes":
+                            Character.purchases(self)
+                        elif buy_others == "No":
+                            main(enemylist[randint(0, 2)])
+                        else:
+                            print("Invalid Input. Please type Yes or No. ")       
+
+                elif buying_options == 'Armors':
+                    for key in armorStore:
+                        print(f"{key} = {armorStore[key]}")
+                    armors_tobuy = input('What armor would you like to buy? ')
+                    if armors_tobuy in armorStore.keys() and armorStore[armors_tobuy] < self.coins:
+                        self.coins -= armorStore[armors_tobuy]
+                        print(f"{self.name} bought {armors_tobuy}.")
+                        self.armorsinventory.append(armors_tobuy)
+                        print(f"{self.name} add {armors_tobuy} to armors inventory.")
+                        continue_shopping = input(f"Do you want to continue shopping? (Yes/No) ")
+                        if continue_shopping == "Yes":
+                            Character.purchases(self)
+                        elif continue_shopping == "No":
+                            main(enemylist[randint(0, 2)])
+                        else:
+                            print("Invalid Input. Please type Yes or No. ")
+                    else:
+                        print("Sorry, you were unable to purchase any armor.")
+                        buy_others = input("Do you want to see the buying options again? (Yes/No) ")
+                        if buy_others == "Yes":
+                            Character.purchases(self)
+                        elif buy_others == "No":
+                            main(enemylist[randint(0, 2)])
+                        else:
+                            print("Invalid Input. Please type Yes or No. ")
+
+                elif buying_options == "Weapons":
+                    for key in weaponStore:
+                        print(f"{key} = {weaponStore[key]}")
+                    weapons_tobuy = input("What weapon would you like to buy? ")
+                    if weapons_tobuy in weaponStore.keys() and weaponStore[weapons_tobuy] < self.coins:
+                        self.coins -= weaponStore[weapons_tobuy]
+                        print(f"{self.name} bought {weapons_tobuy}.")
+                        self.armorsinventory.append(weapons_tobuy)
+                        print(f"{self.name} add {wepaon_tobuy} to weapons inventory.")
+                        continue_shopping = input(f"Do you want to continue shopping? (Yes/No) ")
+                        if continue_shopping == "Yes":
+                            Character.purchases(self)
+                        elif continue_shopping == "No":
+                            main(enemylist[randint(0, 2)])
+                        else:
+                            print("Invalid Input. Please type Yes or No. ")
+                    else:
+                        print("Sorry, you were unable to purchase any weapons.")
+                        buy_others = input("Do you want to see the buying options again? (Yes/No) ")
+                        if buy_others == "Yes":
+                            Character.purchases(self)
+                        elif buy_others == "No":
+                            main(enemylist[randint(0, 2)])
+                        else:
+                            print("Invalid Input. Please type Yes or No. ")                     
+                else:             
+                    print("Sorry, your input was invalid.")
+            elif shopping == "No":
+                main(enemylist[randint(0, 2)])
             else:
-                self.attack(enemy)
-        else:
-            self.attack(enemy)
-                
+                print("Sorry, your input was invalid. Please type Yes or No")
+
+
+
+
+
+    def items_Inventory(self,enemy):
+        print(f'Here is what in your item inventory: {self.itemsinventory}')  
+        use_item = input("What item would you like to use? ") 
+        if use_item == "Super Tonic" and self.player == True:           
+            self.health += 10
+            self.itemsinventory.remove(use_item)
+            print(f'You have healed {self.health} health.')
+        if use_item == "Scroll of Teleport" and self.player == True:
+            self.evade += 2
+            self.itemsinventory.remove(use_item)
+
 
                     
 
         
     def armor_Inventory(self,enemy):
-        if use_armor == "Light Armor" or self.player == True:
+        print(f'Here is what in your armor inventory: {self.armorsinventory}')
+        use_armor = input("What item would you like to use? ")
+        if use_armor == "Light Armor" and self.player == True:
             self.armor += 2
-            if self.armor >= enemy.power:
-                print(f'You tanked his hit.{self.name} received no damage.')
-            else:
-                self.health -= (enemy.power - self.armor)
-                print(f"{enemy.name} did {enemy.power} damage to {self.name}.")    
+            self.armorsinventory.remove(use_armor)
+            print(f"{self.name} put on some light armor")
+
+        if use_armor == "Heavy Armor" and self.player == True:
+            self.armor += 4
+            self.armorsinventory.remove(use_armor)
+            print(f"{self.name} put on some heavy armor")
         else:
-            self.attack(enemy)
+            pass
+
     
+    def weapon_Inventory(self,enemy):
+        print(f'Here is what in your weapon inventory: {self.weaponsinventory}')
+        use_weapon = input("What item would you like to use? ")
+        if use_weapon == "Short Sword":
+            self.power += 2
+            self.weaponsinventory.remove(use_weapon)
+            print(f"{self.name} equip a short sword. ")
+        if use_weapon == "Long Sword":
+            self.power += 3
+            self.weaponsinventory.remove(use_weapon)
+            print(f"{self.name} equip a long sword. ")
+        else:
+            pass
 
-
-
-
-    def weapon_Inventory(self):
 
     def print_status(self):
         if self.player == True:
             print(f"{self.name} health: {self.health}, {self.name} power: {self.power}")
         else: 
             print(f"{self.name} health: {self.health}, {self.name} power: {self.power}")
+    
+    def alive(self):
+        return self.health > 0
         
 
 class Hero(Character):
@@ -145,7 +265,12 @@ class Zombie(Character):
         self.crit_chance = True
         self.bounty = 20
     def alive(self):
-            return True
+        if self.health == float(0.0) or self.health == 0:
+            return False
+        if self.health < 0:
+            self.health += 10
+        print(f"{self.name} regenerate 10 health")
+    
 
 class Medic(Character):
     def __init__(self,health,power):
@@ -153,7 +278,7 @@ class Medic(Character):
         self.name = "Moira"
         self.player = True
         self.crit_chance = False
-        self.money = 100
+        self.coins = 100
         self.armor = 0
         self.evade = 0
     def print_status(self):
@@ -168,7 +293,7 @@ class Shadow(Character):
         self.name = "Naruto"
         self.player = True
         self.crit_chance = True
-        self.money = 100
+        self.coins = 100
         self.armor = 0
         self.evade = 2
     def attack(self,enemy):
@@ -186,15 +311,17 @@ class Dragon(Character):
         self.player = False
         self.crit_chance = True
         self.bounty = 500
+    # def attack(self,enemy):
+
 
 class Beastman(Character):
     def __init__(self,health,power):
         super().__init__(health,power)
-        self.name = "Pasion the Beast King"
+        self.name = "Matt the Beast King"
         self.player = True
         self.crit_chance = True
         self.animalinstict = True
-        self.money = 100
+        self.coins = 100
         self.armor = 0
         self.evade = 0
 
@@ -211,43 +338,36 @@ class Beastman(Character):
         else:
             super().attack(enemy)
 
-class Store:
-    itemsStore = {
-    'Super Tonic' : 15
-    'Scroll of Teleportation' : 30
-    }
-    armorStore ={
-    'Light Armor' : 50
-    }
-    weaponStore = {
-    'Short Sword' : 50
-    'Shield' : 50 
-    'Great Sword' : 100
-    }
-
-    def purchase_items(self):
-        shopping = input(f"Would {self.name} like to go shopping? (Yes/No) ")
-        if shopping == 'Yes':
-            buying_options = input("What do you want to buy? (Items, Armors, Weapons) ")
-            if buying_options == 'Items':
-                items_tobuy = input(f'What items would you like to buy? {}')
 
 
 
-beastman = Beastman(12,5)
-medic = Medic(8,2)    
-hero = Hero(15,5)
+beastman = Beastman(20,5)
+medic = Medic(15,2)    
+hero = Hero(25,5)
 goblin = Goblin(10,2)
 zombielord = Zombie(10,1)
-shadow = Shadow(1,4)
-enemylist = [goblin,zombielord]
-playerlist = [hero,medic,shadow,beastman]
-
+shadow = Shadow(10,4)
+dragon = Dragon(100,7)
+enemylist = [goblin,zombielord,dragon]
+playerlist = [hero, medic, shadow, beastman]
+itemsStore = {
+    'Super Tonic' : 15,
+    'Scroll of Teleportation' : 30,
+    }
+armorStore ={
+    'Light Armor' : 75,
+    'Heavy Armor' : 150,
+    }
+weaponStore = {
+    'Short Sword' : 50,
+    'Long Sword' : 80,
+    }
 
 
 def main(enemy):
 
-    while enemy.alive() and beastman.alive():
+
+    while beastman.alive():
         beastman.print_status()
         enemy.print_status()
 
@@ -256,6 +376,11 @@ def main(enemy):
         print(f"1. Fight {enemy.name}.")
         print("2. Do nothing.")
         print("3. Flee.")
+        print("4. Return to town to buy some items and equipments.")
+        print("5. Use an item.")
+        print("6. Put on an armor.")
+        print("7. Wield a weapon.")
+        print("8. End game.")
         print("> ", end=' ')
         keyinput = input()
         if keyinput == "1":
@@ -263,14 +388,23 @@ def main(enemy):
         elif keyinput == "2":
             pass
         elif keyinput == "3":
+            main(enemylist[randint(0, 2)])
+        elif keyinput =="4":
+            beastman.purchases()
+        elif keyinput == "5":
+            beastman.items_Inventory(enemy)
+        elif keyinput == "6":
+            beastman.armor_Inventory(enemy)
+        elif keyinput == "7":
+            beastman.weapon_Inventory(enemy)    
+        elif keyinput == "8":
             print("Goodbye.")
-            break
+            exit()
         else:
             print(f"Invalid input {keyinput}")
 
         if enemy.alive():
             enemy.attack(beastman)
-        
- 
 
-main(enemylist[randint(0, 1)])
+            
+main(enemylist[randint(0,2)])
