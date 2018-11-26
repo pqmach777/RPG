@@ -11,7 +11,8 @@ from random import randint
 from random import uniform
 def enemygenerator(numberofenemies):
     i = 0
-    enemylist = list()
+    global encounterlist
+    global encounterlistname
     while i != numberofenemies:
         enemytype = random.choice(["Troll","Orc","Goblin"])
         enemynumber = str(randint(1,5))
@@ -19,9 +20,29 @@ def enemygenerator(numberofenemies):
         enemypower = randint(1,5)
         enemyhealth = randint(10,20)
         enemygenerated = Goblin(enemyhealth,enemypower,enemyname)
-        enemylist.append(enemygenerated)
+        encounterlist.append(enemygenerated)
+        encounterlistname.append(enemygenerated.name)
         i += 1
-    return enemylist
+    return encounterlist
+def foreachenemyselect(enemyencounter):
+    index = 0
+    for enemy in enemyencounter:
+        enemy = index
+        numberofenemy.append(enemy)
+        index += 1
+    return numberofenemy
+def listingencounter():
+    global encounterlist
+    global encounterlistname
+    global numberofenemy
+    i = 0
+    for number in encounterlist:
+        strnumber = numberofenemy[i] + 1
+        #print(strnumber+":"+encounterlistname(i))
+        
+        #print(str(strnumber)+":"+encounterlistname[i])
+        print(str(i+1)+":"+encounterlistname[i])
+        i += 1
 class Monster:
     def __init__(self,health,power,name):   
         self.name = name
@@ -376,10 +397,11 @@ class Beastman(Character):
         else:
             super().attack(enemy)
 
-
-
-
-beastman = Beastman(2000,5)
+numberofenemy = list()
+encounterlist = list()
+encounterlistname = list()
+createdenemylist = enemygenerator(3)
+beastman = Beastman(2000,50)
 medic = Medic(15,2)    
 hero = Hero(25,5)
 goblin = Goblin(10,2,'Pooper')
@@ -407,6 +429,7 @@ weaponStore = {
     }
 
 def main(enemy):
+    global encounterselect
     while beastman.alive():
         beastman.print_status()
         enemy.print_status()
@@ -423,6 +446,11 @@ def main(enemy):
         print("8. End game.")
         print("> ", end=' ')
         keyinput = input()
+        while keyinput not in ("1","2","3","4","5","6","7","8"):
+            print(keyinput)
+            print(type(keyinput))
+            print("Try again")
+            keyinput = input()
         if keyinput == "1":
             beastman.attack(enemy)
         elif keyinput == "2":
@@ -440,15 +468,49 @@ def main(enemy):
         elif keyinput == "8":
             print("Goodbye.")
             exit()
-        else:
-            print(f"Invalid input {keyinput}")
-
+    
+        print(not encounterlist)
         if enemy.alive():
             enemy.attack(beastman)
         else: 
-            createdenemylist = enemygenerator(1)
-            encounter = random.choice(createdenemylist)
+            del(encounterlist[encounterselect])
+            del(encounterlistname[encounterselect])
+            if not encounterlist: 
+                createdenemylist = enemygenerator(3)
+                print("Entering new dungeon")
+                foreachenemyselect(encounterlist)
+                print(listingencounter())
+                print("Which monster do you want to fight?")
+                encounterselect = int(input()) - 1
+                while encounterselect not in numberofenemy:
+                    print(encounterselect)
+                    print(type(encounterselect))
+                    print("Does not exist")
+                    encounterselect = int(input()) - 1
+                encounter = (encounterlist[encounterselect])
+                main(encounter)
+            foreachenemyselect(encounterlist)
+            print(listingencounter())
+            print("Which monster do you want to fight?")
+            encounterselect = int(input()) - 1
+            while encounterselect not in numberofenemy:
+                print(encounterselect)
+                print(type(encounterselect))
+                print("Does not exist")
+                encounterselect = int(input()) - 1
+            encounter = (encounterlist[encounterselect])
             main(encounter)
-
             
-main(enemylist[randint(0,2)])
+foreachenemyselect(encounterlist)
+print(listingencounter())
+print("Which monster do you want to fight?")
+encounterselect = int(input()) - 1
+while encounterselect not in numberofenemy:
+    print(encounterselect)
+    print(type(encounterselect))
+    print("Does not exist")
+    encounterselect = int(input()) - 1
+encounter = (encounterlist[encounterselect])
+main(encounter)
+    
+#main(encounterlist[randint(0,2)])
