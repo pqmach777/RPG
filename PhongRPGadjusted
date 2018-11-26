@@ -281,7 +281,7 @@ class Hero(Character):
 
 class Goblin(Character):
     def __init__(self,health,power,name):
-        #super().__init__(health,power)
+        super().__init__(health,power)
         self.name = name
         self.health = health
         self.power = power
@@ -406,13 +406,7 @@ weaponStore = {
     'Long Sword' : 80,
     }
 
-
-def createhero():
-    
-
 def main(enemy):
-
-
     while beastman.alive():
         beastman.print_status()
         enemy.print_status()
